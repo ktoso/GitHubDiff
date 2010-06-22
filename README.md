@@ -18,8 +18,7 @@ you'd have to fund me the publish fee, 100$... ;-)
 
 Screenshot and movie
 --------------------
-<img src="http://github.com/ktoso/GitHubDiff/blob/master/screenshot.png"/>
-
+<img src="https://github.com/ktoso/GitHubDiff/raw/master/screenshot.png"/>
 
 The gadget can be seen in action on youtube: http://www.youtube.com/watch?v=bJIhKxNDNKg
 
@@ -32,9 +31,9 @@ Documentation
 -------------
 Here are some links to get you started:
 
-* Contextual Gadgets: http://code.google.com/apis/gmail/gadgets/contextual/
-* jQuery - getJSON: http://api.jquery.com/jQuery.getJSON/
-* GitHub API - http://develop.github.com/p/commits.html
+* **Contextual Gadgets** http://code.google.com/apis/gmail/gadgets/contextual/
+* **jQuery** - http://api.jquery.com/jQuery.getJSON/
+* **GitHub API** - http://develop.github.com/p/commits.html
 
 
 License
