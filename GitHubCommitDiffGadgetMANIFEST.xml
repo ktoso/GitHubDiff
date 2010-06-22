@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- 
+
+ Copyright (c) 2010 Project13.pl
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.            
+-->
+
+<ApplicationManifest xmlns="http://schemas.google.com/ApplicationManifest/2009">
+
+  <!-- Support info to show in the marketplace & control panel -->
+  <Support>
+    <!-- URL for application setup as an optional redirect during the install -->
+<!--    <Link rel="setup" href="http://example.com/google/setup.php?domain=${DOMAIN_NAME}" />-->
+
+    <!-- URL for application configuration, accessed from the app settings
+     page in the control panel -->
+<!--    <Link rel="manage" href="http://example.com/google/admin.php?domain=${DOMAIN_NAME}" />-->
+
+    <!-- URL explaining how customers get support. -->
+    <Link rel="support" href="http://www.project13.pl" />
+
+    <!-- URL that is displayed to admins during the deletion process,
+     to specify policies such as data retention, how to claim accounts, etc. -->
+    <Link rel="deletion-policy" href="http://example.com/google/deletion-policy.php" />
+  </Support>
+
+  <!-- Name and description pulled from message bundles -->
+  <Name>GitHub Commit Diff</Name>
+  <Description>
+    This app allows you to view diffs (without ever leaving the current email) for github commits if an link to such commit (in an public repository) has been found in the emails body.
+  </Description>
+
+<!-- EXTRACTOR -->
+<Extension id="GitHubCommitExtractor" type="contextExtractor">
+  <Name>Git Hub Commit Extractor</Name>
+  <Url>google.com:HttpLinkExtractor</Url>
+  <Param name="url" value=".*github\.com/.*/.*/commit/.*"/>
+  <Triggers ref="fetchAndShowDiffs"/>
+  <Scope ref="emailSubject"/>
+  <Scope ref="emailBody"/>
+  <Container name="mail"/>
+</Extension>
+
+<!-- GADGET -->
+<Extension id="fetchAndShowDiffs" type="gadget">
+  <Name>GitHub Commit Diff Gadget</Name>
+  <Url>http://www.up.project13.pl/files/GitHubCommitDiffGadget.xml</Url>
+  <Container name="mail"/>
+</Extension>
+
+<!-- SCOPE -->
+<Scope id="emailBody">
+  <Url>tag:google.com,2010:auth/contextual/extractor/BODY</Url>
+  <Reason>
+    This application searches for github commits (emails that contain links to them) - and if found fetches and displays the full diff for the commit.
+  </Reason>
+</Scope>
+
+<Scope id="emailSubject">
+  <Url>tag:google.com,2010:auth/contextual/extractor/SUBJECT</Url>
+  <Reason>
+      This application searches for github commits (emails that contain links to them) - and if found fetches and displays the full diff for the commit.
+  </Reason>
+</Scope>
+
+</ApplicationManifest>

@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+ Copyright (c) 2010 Project13.pl
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+
+-->
+
+<Module>
+    <ModulePrefs title="fetchAndShowDiffs"
+                 description="Gets the commit diff from github"
+                 height="20"
+                 author="Konrad Malawski"
+                 author_email="kmalawski@project13.pl"
+                 author_location="Poland">
+
+        <!-- Declare feature dependencies.
+The first one is not specific to Gmail contextual gadgets. -->
+        <Require feature="dynamic-height"/>
+
+        <!-- The next feature, google.contentmatch, is required for all
+Gmail contextual gadgets.
+<Param> - specify one or more comma-separated extractor IDs in
+a param named "extractors". This line is overridden by the extractor ID
+in the manifest, but is still expected to be present. -->
+        <Require feature="google.contentmatch">
+            <Param name="extractors">
+                google.com:HttpLinkExtractor
+            </Param>
+        </Require>
+    </ModulePrefs>
+
+    <!-- Define the content type and display location. The settings
+"html" and "card" are required for all Gmail contextual gadgets. -->
+    <Content type="html" view="card">
+    <![CDATA[
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="text/javascript"></script>
+        <script type = "text/javascript">
+
+
+
+
+
+
+
+        /**
+ * Function : dump()
+ * Arguments: The data - array,hash(associative array),object
+ *    The level - OPTIONAL
+ * Returns  : The textual representation of the array.
+ * This function was inspired by the print_r function of PHP.
+ * This will accept some data as the argument and return a
+ * text that will be a more readable version of the
+ * array/hash/object that is given.
+ * Docs: http://www.openjs.com/scripts/others/dump_function_php_print_r.php
+ */
+function dump(arr,level) {
+	var dumped_text = "";
+	if(!level) level = 0;
+
+	//The padding given at the beginning of the line.
+	var level_padding = "";
+	for(var j=0;j<level+1;j++) level_padding += "    ";
+
+	if(typeof(arr) == 'object') { //Array/Hashes/Objects
+		for(var item in arr) {
+			var value = arr[item];
+
+			if(typeof(value) == 'object') { //If it is an array,
+				dumped_text += level_padding + "'" + item + "' ...\n";
+				dumped_text += dump(value,level+1);
+			} else {
+				dumped_text += level_padding + "'" + item + "' => \"" + value + "\"\n";
+			}
+		}
+	} else { //Stings/Chars/Numbers etc.
+		dumped_text = "===>"+arr+"<===("+typeof(arr)+")";
+	}
+	return dumped_text;
+}
+
+
+      function nl2br(text){
+        text = escape(text);
+        if(text.indexOf('%0D%0A') > -1){
+        re_nlchar = /%0D%0A/g ;
+        }else if(text.indexOf('%0A') > -1){
+        re_nlchar = /%0A/g ;
+        }else if(text.indexOf('%0D') > -1){
+        re_nlchar = /%0D/g ;
+        }
+        return unescape( text.replace('\n','<br />') );
+        }
+
+        function highlightDiff(diff){
+            if(diff =='' || diff == null){
+                return '<div style="background:white; color:black;">No diff available for display.</div>'; //white, normal
+            }
+
+            var lines = diff.split('\n');
+            var ret = '';
+
+            for(var i=0; i<lines.length; i++){
+                var line = lines[i];
+
+                if(line.charAt(0) == "+"){
+                    ret += '<div style="background:#DDFFDD;color:black;">' + line + '</div>'; //green
+                }else if(line.charAt(0) == "-"){
+                    ret += '<div style="background:#FFDDDD; color:black;">' + line + '</div>'; //red
+                }else if(line.charAt(0) == "@" && line.charAt(1) == '@'){
+                    ret += '<div style="background:#EAF2F5; color:#999999;">' + line + '</div>'; //blue
+                }else{
+                    ret += '<div style="background:white; color:black;">' + line + '</div>'; //white, normal
+                }
+            }
+
+            return "<pre>" + ret + "</pre>";
+        }
+
+
+
+
+
+        <!-- Start by fetching the array of content matches. -->
+        matches = google.contentmatch.getContentMatches();
+
+        $('<a href="#" id="hider">Show/Hide diffs</a>').appendTo('body');
+        $('#hider').click(function(){
+            $('#content').slideToggle('fast', function(){
+
+                if($('#content').is(':visible')){
+                    $('#hider').text('Hide diffs');
+                }else{
+                    $('#hider').text('Show diffs');
+                }
+                gadgets.window.adjustHeight();
+            });
+        });
+        $('<div id="content" style="font-family:\'Bitstream Vera Sans Mono\',\'Courier\',monospace;">Fetching diffs from github...</div>').appendTo('body');        
+
+        /**
+         * We'll get the following data:
+         * host: github.com
+         * path: /ktoso/TravelingSalesman-NBP/commit/0071af8420c017ad68f549234c9d6fadfc327804
+         * url: http://github.com/ktoso/TravelingSalesman-NBP/commit/0071af8420c017ad68f549234c9d6fadfc327804
+         */
+        var url;
+        var path;
+        for (var match in matches) {
+            for (var key in matches[match]) {
+                if (key == 'url') {
+                    url = matches[match][key];
+                } else if (key == 'path') {
+                    path = matches[match][key];
+                }
+            }
+        }
+
+        if (path != '') {
+            var fetchPath = path.replace("commit/", "");
+            var fetchMe = 'http://github.com/api/v2/json/commits/show' + fetchPath;
+
+            $('#content').text('fetching: ' + fetchMe);
+            //fetch commits/show/:user_id/:repository/:sha
+            //documented at:  http://github.com/api/v2/json/commits/show/mojombo/grit/5071bf9fbfb81778c456d62e111440fdc776f76c
+//            $.getJSON(fetchMe, function(data) {
+            $.ajax({
+              url: fetchMe,
+              dataType: 'jsonp',//not "json" - important
+              success: function(json) {
+                if(json == null){
+                    alert("fetched data was null!");
+                    return false;
+                }
+
+                var commit = json.commit;
+                var megaString = '';
+                $('#content').html("<p><b>commit message:</b> " + commit.message + "</p>");
+
+//                $('#content').html(dump(commit));
+//                megaString = dump(commit);
+
+//                $.each(commit.added, function(diff, filename){
+//                    megaString += 'diff: ' + diff;
+//                    megaString += 'filename: ' + filename;
+//                    alert('diff: ' + dump(this.diff))
+//                });
+                $.each(commit.modified, function(id, data){
+                    megaString += '<b>id:</b> ' + id + '<br/>';
+//                    megaString += 'filename: <b>' + data.filename + '</b><br/>';
+                    megaString += '<b>diff:</b><br/> ' + nl2br(highlightDiff(data.diff)) + '<br/>';
+                    megaString += '<br/>';
+                });
+
+                  /* {
+                   *   "commit": {
+                   *     "message": "Version bump to 1.1.1",
+                   *     "added": [
+                   *
+                   *     ],
+                   *     "removed": [
+                   *
+                   *     ],
+                   *     "parents": [
+                   *       {
+                   *         "id": "05372bffe2b60b0d1802f338551856221e0a89d2"
+                   *       }
+                   *     ],
+                   *     "modified": [
+                   *       {
+                   *         "diff": "@@ -1,4 +1,4 @@\n --- \n :major: 1\n :minor: 1\n-:patch: 0\n+:patch: 1",
+                   *         "filename": "VERSION.yml"
+                   *       }
+                   *     ],
+                   *     "author": {
+                   *       "name": "Tom Preston-Werner",
+                   *       "email": "tom@mojombo.com"
+                   *     },
+                   *     "url": "http:\/\/github.com\/mojombo\/grit\/commit\/5071bf9fbfb81778c456d62e111440fdc776f76c",
+                   *     "id": "5071bf9fbfb81778c456d62e111440fdc776f76c",
+                   *     "committed_date": "2009-03-31T09:54:40-07:00",
+                   *     "authored_date": "2009-03-31T09:54:40-07:00",
+                   *     "tree": "e5b860cb18c5c334e480993ca4549d13e0f8b1a8",
+                   *     "committer": {
+                   *       "name": "Tom Preston-Werner",
+                   *       "email": "tom@mojombo.com"
+                   *     }
+                   *   }
+                   * }
+                   */
+//                  alert(megaString);
+                  $('#content').html(megaString);
+            }});
+        }
+
+        gadgets.window.adjustHeight(300);
+        </script>
+    ]]>
+  </Content>
+</Module>
+
