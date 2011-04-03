@@ -20,7 +20,7 @@ Screenshot and movie
 --------------------
 <img src="https://github.com/ktoso/GitHubDiff/raw/master/screenshot.png"/>
 
-The gadget can be seen in action on youtube: http://www.youtube.com/watch?v=bJIhKxNDNKg
+The gadget can be seen in action <a href="http://www.youtube.com/watch?v=bJIhKxNDNKg">on youtube</a>.
 
 Disclaimer
 ----------
