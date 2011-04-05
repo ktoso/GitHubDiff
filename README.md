@@ -25,7 +25,7 @@ The gadget can be seen in action <a href="http://www.youtube.com/watch?v=bJIhKxN
 Disclaimer
 ----------
 *  It's *by no means "production" ready*
-*  - as it's just a fun "hack" done in one night! :-)
+*  as it's just a fun "hack" done in one night! :-)
 
 Documentation
 -------------
